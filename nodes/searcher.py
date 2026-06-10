@@ -25,7 +25,7 @@ def search_jobs(state: dict) -> dict:
                 all_jobs.append({
                     "title": job.get("job_title", ""),
                     "company": job.get("employer_name", ""),
-                    "location": job.get("job_city", "") + ", " + job.get("job_state", ""),
+                    "location": f"{job.get('job_city') or ''}, {job.get('job_state') or ''}".strip(", "), 
                     "description": job.get("job_description", "")[:800],
                     "url": job.get("job_apply_link", ""),
                     "is_remote": job.get("job_is_remote", False),

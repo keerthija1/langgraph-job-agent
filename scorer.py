@@ -47,7 +47,7 @@ Return ONLY a JSON array, no explanation:
             job["score_reason"] = s["reason"]
             scored_jobs.append(job)
     scored_jobs.sort(key=lambda x: x["score"], reverse=True)
-    top_jobs = [j for j in scored_jobs if j["score"] >= 5][:3]
+    top_jobs = scored_jobs[:3]
     logger.info(f"Agent 2: {len(top_jobs)} jobs scored 6+.")
     return {"scored_jobs": scored_jobs, "top_jobs": top_jobs}
 

@@ -1,13 +1,9 @@
 import os
 import requests
 import logging
-import smtplib
 import tempfile
+import base64
 from datetime import datetime
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle
@@ -20,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
+SENDGRID_API_KEY = os.environ["SENDGRID_API_KEY"]
 EMAIL_ADDRESS = os.environ["EMAIL_ADDRESS"]
-EMAIL_PASSWORD = os.environ["EMAIL_PASSWORD"]
 MAX_MSG_LENGTH = 4000
 
 RESUME_DATA = {
@@ -171,22 +167,40 @@ def generate_cover_letter_pdf(job: dict, tailored: dict, output_path: str):
     doc.build(story)
 
 
-def send_email(subject: str, body: str, attachments: list):
-    msg = MIMEMultipart()
-    msg["From"] = EMAIL_ADDRESS
-    msg["To"] = EMAIL_ADDRESS
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
+def send_email_sendgrid(subject: str, body: str, attachments: list):
+    """Send email with PDF attachments via SendGrid API."""
+    attachment_data = []
     for filepath, filename in attachments:
         with open(filepath, "rb") as f:
-            part = MIMEBase("application", "octet-stream")
-            part.set_payload(f.read())
-        encoders.encode_base64(part)
-        part.add_header("Content-Disposition", f"attachment; filename={filename}")
-        msg.attach(part)
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-        server.sendmail(EMAIL_ADDRESS, EMAIL_ADDRESS, msg.as_string())
+            content = base64.b64encode(f.read()).decode()
+        attachment_data.append({
+            "content": content,
+            "type": "application/pdf",
+            "filename": filename,
+            "disposition": "attachment"
+        })
+
+    payload = {
+        "personalizations": [{"to": [{"email": EMAIL_ADDRESS}]}],
+        "from": {"email": EMAIL_ADDRESS},
+        "subject": subject,
+        "content": [{"type": "text/plain", "value": body}],
+        "attachments": attachment_data
+    }
+
+    response = requests.post(
+        "https://api.sendgrid.com/v3/mail/send",
+        headers={
+            "Authorization": f"Bearer {SENDGRID_API_KEY}",
+            "Content-Type": "application/json"
+        },
+        json=payload
+    )
+
+    if response.status_code in [200, 202]:
+        logger.info("Email sent successfully via SendGrid.")
+    else:
+        logger.error(f"SendGrid error: {response.status_code} - {response.text}")
 
 
 def send_telegram(text: str):
@@ -229,13 +243,13 @@ def deliver(state: dict) -> dict:
 
         try:
             parsed = parse_tailored_content(item["tailored_content"])
-            company = "".join(c for c in job["company"] if c.isalnum() or c == "_")
+            company = "".join(c for c in job["company"] if c.isalnum())
             with tempfile.TemporaryDirectory() as tmpdir:
                 resume_path = f"{tmpdir}/Keerthi_Resume_{company}.pdf"
                 cover_path  = f"{tmpdir}/Keerthi_CoverLetter_{company}.pdf"
                 generate_resume_pdf(job, parsed, resume_path)
                 generate_cover_letter_pdf(job, parsed, cover_path)
-                send_email(
+                send_email_sendgrid(
                     subject=f"Job Match: {job['title']} at {job['company']} — {date_str}",
                     body=(f"Hi Keerthi,\n\nYour Job Search Agent found a match!\n\n"
                           f"Role: {job['title']}\nCompany: {job['company']}\n"
@@ -247,7 +261,6 @@ def deliver(state: dict) -> dict:
                         (cover_path,  f"Keerthi_CoverLetter_{company}.pdf"),
                     ]
                 )
-            logger.info(f"Agent 4: Email sent for {job['title']} at {job['company']}")
         except Exception as e:
             logger.error(f"Email/PDF error: {e}")
 

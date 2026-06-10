@@ -17,7 +17,7 @@ def search_jobs(state: dict) -> dict:
             response = requests.get(
                 "https://jsearch.p.rapidapi.com/search",
                 headers=headers,
-                params={"query": f"{query} jobs in United States", "num_pages": "1", "date_posted": "today"},
+                params={"query": f"{query} jobs in United States", "num_pages": "1", "date_posted": "3days"},
                 timeout=15,
             )
             data = response.json()

@@ -50,6 +50,7 @@ Return ONLY a JSON array like this, no explanation:
     text = response.content[0].text.strip()
     text = text.replace("```json", "").replace("```", "").strip()
     scores = json.loads(text)
+    logger.info(f"Scores from Claude: {scores}")
 
     scored_jobs = []
     for s in scores:

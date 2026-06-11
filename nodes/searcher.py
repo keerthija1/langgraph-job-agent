@@ -26,7 +26,7 @@ def search_jobs(state: dict) -> dict:
                     "title": job.get("job_title", ""),
                     "company": job.get("employer_name", ""),
                     "location": f"{job.get('job_city') or ''}, {job.get('job_state') or ''}".strip(", "), 
-                    "description": job.get("job_description", "")[:800],
+                    "description": job.get("job_description", "")[:4000],
                     "url": job.get("job_apply_link", ""),
                     "is_remote": job.get("job_is_remote", False),
                 })

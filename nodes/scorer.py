@@ -6,7 +6,12 @@ import logging
 logger = logging.getLogger(__name__)
 claude = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
-RESUME = open(os.path.join(os.path.dirname(__file__), "../resume.txt")).read()
+try:
+    RESUME = open(os.path.join(os.path.dirname(__file__), "../resume.txt")).read()
+    logger.info(f"Resume loaded: {len(RESUME)} characters")
+except Exception as e:
+    logger.error(f"Failed to load resume: {e}")
+    RESUME = ""
 
 def score_jobs(state: dict) -> dict:
     """Agent 2 — Score each job against Keerthi's profile using Claude."""

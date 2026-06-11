@@ -21,7 +21,7 @@ def score_jobs(state: dict) -> dict:
         for i, j in enumerate(jobs)
     ])
 
-    prompt = f"""You are a career advisor evaluating job listings for a candidate.
+    prompt = f"""You are a career advisor evaluating job listings for a candidate transitioning into AI engineering.
 
 CANDIDATE RESUME:
 {RESUME}
@@ -29,13 +29,16 @@ CANDIDATE RESUME:
 JOB LISTINGS:
 {jobs_text}
 
-Score each job from 1-10 based on:
-- Skills match (does the job require skills the candidate has?)
-- Experience level fit (is the candidate qualified?)
-- Relevance to AI engineering transition
-- Visa sponsorship likelihood (prefer companies known to sponsor H1B)
+Score each job from 1-10 using these criteria:
+- 8-10: Strong match — requires Python, AI/LLM tools, automation, or agent development. Candidate clearly qualifies.
+- 6-7: Good match — partial overlap with candidate's skills, reasonable to apply.
+- 4-5: Weak match — some transferable skills but significant gaps.
+- 1-3: Poor match — very different domain or requires years of experience candidate lacks.
 
-Return ONLY a JSON array like this, no explanation:
+Be generous — if the candidate has 60%+ of the required skills, score it 6 or above.
+Do NOT consider visa sponsorship in your scoring — ignore that factor entirely.
+
+Return ONLY a JSON array, no explanation:
 [
   {{"job_index": 1, "score": 8, "reason": "Strong match - requires Python and Claude API experience"}},
   {{"job_index": 2, "score": 5, "reason": "Partial match - requires ML experience not on resume"}}

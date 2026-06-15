@@ -1,6 +1,7 @@
 import os
 import requests
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -14,12 +15,18 @@ def search_jobs(state: dict) -> dict:
     queries = ["AI Engineer", "AI Automation Engineer", "LLM Engineer", "Prompt Engineer"]
     for query in queries:
         try:
-            response = requests.get(
-                "https://jsearch.p.rapidapi.com/search",
-                headers=headers,
-                params={"query": f"{query} United States", "num_pages": "1"},
-                timeout=15,
-            )
+            for attempt in range(3):
+                try:
+                    response = requests.get(
+                        "https://jsearch.p.rapidapi.com/search",
+                        headers=headers,
+                        params={"query": f"{query} United States", "num_pages": "3", "date_posted": "3days"},
+                        timeout=30,
+                    )
+                    break
+                except requests.exceptions.Timeout:
+                    logger.warning(f"Timeout on attempt {attempt+1} for '{query}', retrying...")
+                    time.sleep(5)
             data = response.json()
             for job in data.get("data", [])[:3]:
                 all_jobs.append({

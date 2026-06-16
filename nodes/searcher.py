@@ -57,6 +57,7 @@ def search_jobs(state: dict) -> dict:
                     timeout=30,
                 )
                 data = response.json()
+                logger.info(f"JSearch response for '{query}': status={response.status_code}, jobs={len(data.get('data', []))}")
                 for job in data.get("data", [])[:5]:
                     all_jobs.append({
                         "title": job.get("job_title", ""),

@@ -48,6 +48,7 @@ def search_jobs(state: dict) -> dict:
                 })
         except Exception as e:
             logger.error(f"Search error for query '{query}': {e}")
+            return all_jobs
 
     # Deduplicate by URL
     seen = set()

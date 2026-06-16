@@ -27,20 +27,8 @@ def search_jobs(state: dict) -> dict:
 
     queries = [
         "AI Engineer",
-        "Machine Learning Engineer",
         "LLM Engineer",
-        "Prompt Engineer",
-        "AI Developer",
         "Generative AI Engineer",
-        "Python AI Engineer",
-        "AI Agent Developer",
-        "AI Automation Engineer",
-        "AI Integration Engineer",
-        "NLP Engineer",
-        "AI Solutions Engineer",
-        "AI Backend Engineer",
-        "MLOps Engineer",
-        "Conversational AI Engineer",
     ]
 
     for query in queries:
@@ -51,7 +39,7 @@ def search_jobs(state: dict) -> dict:
                     headers=headers,
                     params={
                         "query": f"{query} United States",
-                        "num_pages": "3",
+                        "num_pages": "1",
                         "date_posted": "3days",
                     },
                     timeout=30,

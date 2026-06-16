@@ -58,6 +58,7 @@ def search_jsearch(headers):
             except Exception as e:
                 logger.error(f"JSearch error for '{query}': {e}")
                 break
+return all_jobs
 
 
 def search_tavily_site(query, site):
@@ -83,6 +84,7 @@ def search_tavily_site(query, site):
     except Exception as e:
         logger.error(f"Tavily error for {site}: {e}")
         return []
+    
 
 
 def search_jobs(state: dict) -> dict:
